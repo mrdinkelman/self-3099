@@ -23,7 +23,9 @@
         "incenteev/composer-parameter-handler": "~2.0",
         "symfony/finder": "^3.0",
         "symfony/console": "2.8.6",
-        "phpunit/phpunit": "^5.3"
+        "phpunit/phpunit": "^5.3",
+        "ddeboer/data-import": "@stable",
+        "doctrine/doctrine-migrations-bundle": "^1.1"
     },
     "require-dev": {
         "sensio/generator-bundle": "~3.0",
