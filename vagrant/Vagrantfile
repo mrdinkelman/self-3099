@@ -1,0 +1,118 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# specify project name, domain will be created
+# uri: http://{$project}
+$project = "local.self-3099.edu"
+
+# ip address for vagrant private network
+$ip = "192.168.33.10"
+
+# ssh credentials
+$ssh_username = $ssh_password = "vagrant"
+
+# specify php version, please see phpbrew documentation
+# or run phpbrew list for fetch all possible php versions
+$php_version = "5.6.21"
+$zts = true
+
+# specify vm settings
+$memory = 1024
+$cpus = 2
+$name = "Itransition - SELF-3099 Symfony Test task"
+
+# main vagrant config
+Vagrant.configure(2) do |config|
+    # box: ubuntu 14.04.2 LTS Server
+    config.vm.box = "ubuntu/trusty64"
+
+    # network settings
+    config.vm.network "private_network", ip: $ip
+    config.vm.network "forwarded_port", guest: 9090, host: 9099
+
+    # ssh settings
+    config.ssh.username = $ssh_username
+    config.ssh.password = $ssh_password
+    config.ssh.insert_key = true
+
+    # synced folders list
+    config.vm.synced_folder "../", "/var/www/" + $project, create:true, owner:"www-data", group: "www-data", nfs: true
+    config.vm.synced_folder ".ssh", "/home/vagrant/.ssh", create:true, owner: "vagrant"
+    config.vm.synced_folder "/apache2/sites-available", "/etc/apache2/sites-available", create:true, owner:'www-data', group:"www-data", nfs: true
+    config.vm.synced_folder ".phpbrew/php/"+ $php_version +"/etc",
+        "/home/vagrant/.phpbrew/php/" + $php_version + "/etc", create:true, owner:'vagrant'
+    config.vm.synced_folder ".phpstorm_helpers", "/home/vagrant/.phpstorm_helpers", create:true, owner:'vagrant'
+
+    # setup
+    config.vm.provider "virtualbox" do |vb|
+        vb.memory = $memory
+        vb.cpus = $cpus
+
+        vb.name = $name
+
+        #vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+        #vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+        #vb.customize ["modifyvm", :id, "--ioapic", "on"]
+    end
+
+    config.vm.provision "shell", 
+      path: "VagrantUp.sh", 
+      keep_color:true, 
+      env: {
+        PROJECT: $project
+      }
+end
+
+"""
+    config.vm.provision shell, inline: <<-SHELL
+        sudo apt-get update && sudo apt-get upgrade -y && \
+        sudo apt-get install -y apache2 && \
+        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && \
+        echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' |
+        sudo tee /etc/apt/sources.list.d/mongodb.list && \
+        sudo apt-get update && sudo apt-get install mongodb-org -y && \
+        sudo service mongod status && \
+        sudo apt-get install memcached -y && sudo service memcached restart && \
+        sudo add-apt-repository ppa:chris-lea/redis-server -y && sudo apt-get update && \
+        sudo apt-get install redis-server -y && sudo service redis-server restart && \
+        sudo apt-get install git git-flow -y && sudo apt-get install htop -y
+        sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password 1234' && \
+        sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password 1234' && \
+        sudo apt-get install mysql-server -y
+    SHELL
+
+    config.vm.provision shell, inline: <<-SHELL
+        apt-get build-dep php5 -y && \
+        apt-get install -y php5 php5-dev php-pear autoconf automake curl libcurl3-openssl-dev build-essential libxslt1-dev re2c libxml2 libxml2-dev php5-cli bison libbz2-dev libreadline-dev && \
+        apt-get install -y libfreetype6 libfreetype6-dev libpng12-0 libpng12-dev libjpeg-dev libjpeg8-dev libjpeg8  libgd-dev libgd3 libxpm4 libltdl7 libltdl-dev && \
+        apt-get install -y libssl-dev openssl && \
+        apt-get install -y gettext libgettextpo-dev libgettextpo0 && \
+        apt-get install -y libicu-dev && \
+        apt-get install -y libmhash-dev libmhash2 && \
+        apt-get install -y libmcrypt-dev libmcrypt4
+    SHELL
+
+    config.vm.provision shell, inline: <<-SHELL
+        cd /tmp && curl -L -O https://github.com/phpbrew/phpbrew/raw/master/phpbrew && \
+        chmod +x phpbrew && sudo mv phpbrew /usr/local/bin/phpbrew && \
+        phpbrew init && phpbrew list && sudo apt-get install nodejs -y && \
+        sudo apt-get install npm -y && sudo npm install apidoc -g -y && \
+        sudo apt-get install -y php5 php5-dev php-pear autoconf automake curl libcurl3-openssl-dev build-essential libxslt1-dev re2c libxml2 libxml2-dev php5-cli bison libbz2-dev libreadline-dev libicu-dev && \
+        sudo apt-get autoremove -y && sudo apt-get install autoconf -y && sudo service apache2 restart && \
+        sudo service apache2 restart && \
+        sudo chmod -R oga+rw /usr/lib/apache2/modules && sudo chmod -R oga+rw /etc/apache2 && \
+        sudo echo 192.168.33.10 local.eat-info.ru www.local.eat-info.ru >> /etc/hosts && \
+        sudo apt-get install imagemagick php5-imagick -y && \
+        sudo apt-get install libmagickwand-dev libmagickcore-dev -y
+    SHELL
+
+        phpbrew --debug install 5.6.21 +dbs +mb +default +bcmath +bz2 +calendar +ctype +dom +fileinfo +exif +ftp +gettext +hash +iconv +imap +intl +kerberos +openssl +tokenizer +xmlrpc +zip +apxs2=/usr/bin/apxs2 +fpm -- --enable-maintainer-zts
+        phpbrew --debug ext install pthreads 2.0.10
+        phpbrew --debug ext install apcu
+        phpbrew --debug ext install memcache
+        phpbrew --debug ext install mongo
+        phpbrew --debug ext install redis
+        phpbrew --debug ext install gd -- --with-freetype-dir --enable-gd-native-ttf --with-jpeg-dir --with-png-dir
+        phpbrew --debug ext install xdebug
+
+    phpcs phpcbf """
