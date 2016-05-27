@@ -25,7 +25,8 @@
         "symfony/console": "2.8.6",
         "phpunit/phpunit": "^5.3",
         "ddeboer/data-import": "@stable",
-        "doctrine/doctrine-migrations-bundle": "^1.1"
+        "doctrine/doctrine-migrations-bundle": "^1.1",
+        "symfony/validator": "^3.0"
     },
     "require-dev": {
         "sensio/generator-bundle": "~3.0",
