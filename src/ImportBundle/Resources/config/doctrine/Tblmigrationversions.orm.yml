@@ -1,0 +1,13 @@
+ImportBundle\Entity\Tblmigrationversions:
+    type: entity
+    table: tblMigrationVersions
+    id:
+        version:
+            type: string
+            nullable: false
+            length: 255
+            fixed: false
+            id: true
+            generator:
+                strategy: IDENTITY
+    lifecycleCallbacks: {  }
