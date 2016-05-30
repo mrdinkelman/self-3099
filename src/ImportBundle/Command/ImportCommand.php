@@ -4,15 +4,25 @@ namespace ImportBundle\Command;
 
 use Ddeboer\DataImport\Filter\CallbackFilter;
 use Ddeboer\DataImport\Filter\ValidatorFilter;
+use Ddeboer\DataImport\ItemConverter\CallbackItemConverter;
 use Ddeboer\DataImport\ItemConverter\MappingItemConverter;
 use Ddeboer\DataImport\Reader\CsvReader;
+use Ddeboer\DataImport\ValueConverter\ArrayValueConverterMap;
+use Ddeboer\DataImport\ValueConverter\CallbackValueConverter;
+use Ddeboer\DataImport\ValueConverter\DateTimeValueConverter;
+use Ddeboer\DataImport\ValueConverter\MappingValueConverter;
+use Ddeboer\DataImport\ValueConverter\StringToObjectConverter;
 use Ddeboer\DataImport\Workflow;
+use Ddeboer\DataImport\Writer\ConsoleTableWriter;
 use Ddeboer\DataImport\Writer\DoctrineWriter;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Exception\RuntimeException;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Validator\Validator;
 
 class ImportCommand extends ContainerAwareCommand
 {
@@ -54,30 +64,78 @@ class ImportCommand extends ContainerAwareCommand
 
         $workflow = new Workflow($reader);
 
-        $converter = new MappingItemConverter();
+        $entityManager = $this->getContainer()->get('doctrine')->getEntityManager();
 
+        $doctrineWriter = new DoctrineWriter($entityManager, 'ImportBundle:Tblproductdata');
+        $workflow->addWriter($doctrineWriter);
+
+        /*$output = new ConsoleOutput();
+
+        $consoleWriter = new ConsoleTableWriter($output, new Table($output));
+
+
+
+        $workflow->addWriter($consoleWriter);*/
+
+        $converter = new MappingItemConverter();
         $converter
             ->addMapping('Product Code', 'strproductcode')
             ->addMapping('Product Name', 'strproductname')
             ->addMapping('Product Description', 'strproductdesc')
             ->addMapping('Stock', 'intstock')
-            ->addMapping('Cost in GBP', 'floatcostingbp');
+            ->addMapping('Cost in GBP', 'floatcostingbp')
+            ->addMapping('Discontinued', 'dtmDiscontinued');
 
         $workflow->addItemConverter($converter);
+        $workflow->setSkipItemOnFailure(true);
 
-        $workflow->addFilter(
+        $converter = new CallbackItemConverter(function ($item) {
+            $item['dtmadded'] = new \DateTime();
+            $item['stmtimestamp'] = new \DateTime();
+
+            /*if (!empty($item['dtmDiscontinued'])) {
+                $item['dtmDiscontinued'] = new \DateTime();
+            } else {
+                $item['dtmDiscontinued'] = null;
+            }*/
+
+            return $item;
+        });
+
+       $workflow->addFilter(
             new CallbackFilter(function ($data) {
-                return empty($data['floatcostingbp']) || !is_numeric($data['floatcostingbp']);
+                return is_numeric($data['Cost in GBP']);
             })
         );
 
+        $workflow->addFilter(
+            new CallbackFilter(function ($data) {
+                return $data['Cost in GBP'] > 5  && $data['Stock'] > 10;
+            })
+        );
+
+        $workflow->addFilter(
+            new CallbackFilter(function ($data) {
+                return $data['Cost in GBP'] < 1000;
+            })
+        );
+
+        $dt = new DateTimeValueConverter('\y\e\s', 'Y-m-d');
+
+        $workflow->addValueConverter("dtmDiscontinued", $dt);
+            /*new CallbackValueConverter(function ($item) {
+                return date("Y-m-d", time());
+            }));*/
+
+        $workflow->addItemConverter($converter);
+
         
 
-        $entityManager = $this->getContainer()->get('doctrine')->getEntityManager();
 
-        $doctrineWriter = new DoctrineWriter($entityManager, 'ImportBundle:Tblproductdata');
 
-        $workflow->addWriter($doctrineWriter);
+
+
+
 
         $workflow->process();
     }
