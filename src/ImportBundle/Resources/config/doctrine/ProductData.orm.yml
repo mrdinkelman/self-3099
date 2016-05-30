@@ -1,4 +1,4 @@
-ImportBundle\Entity\Tblproductdata:
+ImportBundle\Entity\ProductData:
     type: entity
     table: tblProductData
     uniqueConstraints:
@@ -6,7 +6,7 @@ ImportBundle\Entity\Tblproductdata:
             columns:
                 - strProductCode
     id:
-        intproductdataid:
+        id:
             type: integer
             nullable: false
             unsigned: true
@@ -15,43 +15,43 @@ ImportBundle\Entity\Tblproductdata:
             generator:
                 strategy: IDENTITY
     fields:
-        strproductname:
+        productName:
             type: string
             nullable: false
             length: 50
             fixed: false
             column: strProductName
-        strproductdesc:
+        productDesc:
             type: string
             nullable: false
             length: 255
             fixed: false
             column: strProductDesc
-        strproductcode:
+        productCode:
             type: string
             nullable: false
             length: 10
             fixed: false
             column: strProductCode
-        dtmadded:
+        added:
             type: datetime
             nullable: true
             column: dtmAdded
-        dtmdiscontinued:
+        discontinued:
             type: datetime
             nullable: true
             column: dtmDiscontinued
-        stmtimestamp:
+        timestamp:
             type: datetime
             nullable: false
             default: CURRENT_TIMESTAMP
             column: stmTimestamp
-        intstock:
+        stock:
             type: integer
             nullable: false
             unsigned: false
             column: intStock
-        floatcostingbp:
+        costInGBP:
             type: decimal
             nullable: false
             precision: 15

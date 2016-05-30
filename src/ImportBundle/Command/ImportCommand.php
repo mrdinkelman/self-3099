@@ -39,6 +39,7 @@ class ImportCommand extends ContainerAwareCommand
         }
 
         $file = new \SplFileObject($input->getOption('file'));
+
         $reader = new CsvReader($file);
 
         $output->writeln(sprintf("Importing %s...", $file->getBasename()));
@@ -54,26 +55,26 @@ class ImportCommand extends ContainerAwareCommand
 
             $writer = new ArrayWriter($testData);
         } else {
-            $writer = new DoctrineWriter($entityManager, 'ImportBundle:Tblproductdata');
+            $writer = new DoctrineWriter($entityManager, 'ImportBundle:ProductData');
         }
 
         $workflow->addWriter($writer);
 
         $converter = new MappingItemConverter();
         $converter
-            ->addMapping('Product Code', 'strproductcode')
-            ->addMapping('Product Name', 'strproductname')
-            ->addMapping('Product Description', 'strproductdesc')
-            ->addMapping('Stock', 'intstock')
-            ->addMapping('Cost in GBP', 'floatcostingbp')
-            ->addMapping('Discontinued', 'dtmdiscontinued');
+            ->addMapping('Product Code', 'productCode')
+            ->addMapping('Product Name', 'productName')
+            ->addMapping('Product Description', 'productDesc')
+            ->addMapping('Stock', 'stock')
+            ->addMapping('Cost in GBP', 'costInGBP')
+            ->addMapping('Discontinued', 'discontinued');
 
         $workflow->addItemConverter($converter);
         $workflow->setSkipItemOnFailure(true);
 
         $converter = new CallbackItemConverter(function ($item) {
-            $item['dtmadded'] = new \DateTime();
-            $item['stmtimestamp'] = new \DateTime();
+            $item['added'] = new \DateTime();
+            $item['timestamp'] = new \DateTime();
 
             return $item;
         });
@@ -98,7 +99,7 @@ class ImportCommand extends ContainerAwareCommand
         $workflow->addItemConverter($converter);
 
         $workflow->addValueConverter(
-            "dtmdiscontinued", new CallbackValueConverter(function ($item) {
+            "discontinued", new CallbackValueConverter(function ($item) {
                 if (empty($item)) {
                     return null;
                 }
