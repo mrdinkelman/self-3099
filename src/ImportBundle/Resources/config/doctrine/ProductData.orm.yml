@@ -2,7 +2,7 @@ ImportBundle\Entity\ProductData:
     type: entity
     table: tblProductData
     uniqueConstraints:
-        strProductCode:
+        productCode:
             columns:
                 - strProductCode
     id:

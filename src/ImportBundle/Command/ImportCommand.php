@@ -10,6 +10,7 @@ use Ddeboer\DataImport\ValueConverter\CallbackValueConverter;
 use Ddeboer\DataImport\Workflow;
 use Ddeboer\DataImport\Writer\ArrayWriter;
 use Ddeboer\DataImport\Writer\DoctrineWriter;
+use ForceUTF8\Encoding;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
@@ -50,12 +51,12 @@ class ImportCommand extends ContainerAwareCommand
 
         $entityManager = $this->getContainer()->get('doctrine')->getEntityManager();
 
+        $writer = new DoctrineWriter($entityManager, 'ImportBundle:ProductData');
+
         if ($input->getOption('test-mode')) {
             $testData = array();
 
             $writer = new ArrayWriter($testData);
-        } else {
-            $writer = new DoctrineWriter($entityManager, 'ImportBundle:ProductData');
         }
 
         $workflow->addWriter($writer);
@@ -70,6 +71,7 @@ class ImportCommand extends ContainerAwareCommand
             ->addMapping('Discontinued', 'discontinued');
 
         $workflow->addItemConverter($converter);
+
         $workflow->setSkipItemOnFailure(true);
 
         $converter = new CallbackItemConverter(function ($item) {
@@ -98,21 +100,28 @@ class ImportCommand extends ContainerAwareCommand
 
         $workflow->addItemConverter($converter);
 
-        $workflow->addValueConverter(
-            "discontinued", new CallbackValueConverter(function ($item) {
-                if (empty($item)) {
-                    return null;
-                }
+        $encoding = new CallbackValueConverter(function($item) {
+           return Encoding::toUTF8($item);
 
-                return new \DateTime();
-            })
-        );
+        });
+
+        $discontinued =  new CallbackValueConverter(function ($item) {
+            if (empty($item)) {
+                return null;
+            }
+
+            return new \DateTime();
+        });
+
+        $workflow->addValueConverter("productName", $encoding);
+        $workflow->addValueConverter("productDesc", $encoding);
+        $workflow->addValueConverter("discontinued", $discontinued);
 
         $result = $workflow->process();
 
         if ($skipped) {
             foreach ($skipped as $data) {
-                $output->writeln(sprintf("[Skipped]: %s", implode(":", $data)));
+                $output->writeln(sprintf("[Skipped]: %s", implode(" : ", $data)));
             }
         }
 
