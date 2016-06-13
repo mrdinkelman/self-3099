@@ -2,21 +2,27 @@
 
 namespace ImportBundle\Command;
 
-use Ddeboer\DataImport\Filter\CallbackFilter;
-use Ddeboer\DataImport\ItemConverter\CallbackItemConverter;
+//use Ddeboer\DataImport\Filter\CallbackFilter;
 use Ddeboer\DataImport\ItemConverter\MappingItemConverter;
 use Ddeboer\DataImport\Reader\CsvReader;
-use Ddeboer\DataImport\ValueConverter\CallbackValueConverter;
-use Ddeboer\DataImport\Workflow;
-use Ddeboer\DataImport\Writer\ArrayWriter;
+//use Ddeboer\DataImport\ValueConverter\CallbackValueConverter;
+//use Ddeboer\DataImport\Workflow;
+//use Ddeboer\DataImport\Writer\ArrayWriter;
+use Ddeboer\DataImport\Result;
+use Ddeboer\DataImport\Writer\ConsoleProgressWriter;
 use Ddeboer\DataImport\Writer\DoctrineWriter;
-use ForceUTF8\Encoding;
+//use ForceUTF8\Encoding;
+use ImportBundle\Exception\RuntimeException;
+use ImportBundle\Filters\CostAndStockFilter;
+//use ImportBundle\Helper\DateTime;
+use ImportBundle\ItemConverter\DiscontinuedConverter;
+// use ImportBundle\Services\Import;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Validator\Validator;
+//use Symfony\Component\Filesystem\Filesystem;
+//use Symfony\Component\Validator\Validator;
 
 class ImportCommand extends ContainerAwareCommand
 {
@@ -35,7 +41,78 @@ class ImportCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if (!file_exists($input->getOption('file'))) {
+        $output->writeln(
+            sprintf(
+                "Starting import for file... %s",
+                $input->getOption('file')
+            )
+        );
+
+        // get service
+        $service = $this->getContainer()->get('service.import');
+
+        try {
+            // set reader to service, specify input file
+            $service->setReader(
+                new CsvReader(
+                    new \SplFileObject($input->getOption('file'))
+                )
+            );
+
+            // test mode: just skip doctrine writer creation
+            if (!$input->getOption('test-mode')) {
+                $service->addWriter(
+                    new DoctrineWriter(
+                        $this->getContainer()->get('doctrine')->getEntityManager(),
+                        'ImportBundle:ProductData'
+                    )
+                );
+            } else {
+                $output->writeln("Note: Command working in test-mode. No changes in db produced!");
+            }
+
+            $service->addWriter(
+                new ConsoleProgressWriter($output, $service->getReader())
+            );
+
+            // filters for columns
+            $service->addFilter(new CostAndStockFilter('Cost in GBP', 'Stock'));
+
+            // columns mapping
+            $service->setItemConverter(
+                new MappingItemConverter(
+                    [
+                        'Product Code' => 'productCode',
+                        'Product Name' => 'productName',
+                        'Product Description' => 'productDesc',
+                        'Stock' => 'stock',
+                        'Cost in GBP' => 'costInGBP',
+                        'Discontinued' => 'discontinued'
+                    ]
+                )
+            );
+
+            // extra value conversions
+            $service->addValueConverter("discontinued", new DiscontinuedConverter());
+
+            $service->process();
+        } catch (RuntimeException $ex) {
+
+        }
+
+        $output->writeln(
+            sprintf(
+                "\nResult: Total - %s, Success: %s, Skipped: %s",
+                $service->getReader()->count(),
+                $service->getResult()->getSuccessCount(),
+                $service->getReader()->count() - $service->getResult()->getSuccessCount()
+            )
+        );
+
+
+        /*$fs = new Filesystem();
+
+        if (!$fs->exists($input->getOption('file'))) {
             throw new RuntimeException(sprintf("File %s doesn't exists", $input->getOption('file')));
         }
 
@@ -61,25 +138,20 @@ class ImportCommand extends ContainerAwareCommand
 
         $workflow->addWriter($writer);
 
-        $converter = new MappingItemConverter();
-        $converter
-            ->addMapping('Product Code', 'productCode')
-            ->addMapping('Product Name', 'productName')
-            ->addMapping('Product Description', 'productDesc')
-            ->addMapping('Stock', 'stock')
-            ->addMapping('Cost in GBP', 'costInGBP')
-            ->addMapping('Discontinued', 'discontinued');
+        $converter = new MappingItemConverter(
+            [
+                'Product Code' => 'productCode',
+                'Product Name' => 'productName',
+                'Product Description' => 'productDesc',
+                'Stock' => 'stock',
+                'Cost in GBP' => 'costInGBP',
+                'Discontinued' => 'discontinued'
+            ]
+        );
 
         $workflow->addItemConverter($converter);
 
         $workflow->setSkipItemOnFailure(true);
-
-        $converter = new CallbackItemConverter(function ($item) {
-            $item['added'] = new \DateTime();
-            $item['timestamp'] = new \DateTime();
-
-            return $item;
-        });
 
         $skipped = array();
 
@@ -98,10 +170,8 @@ class ImportCommand extends ContainerAwareCommand
             })
         );
 
-        $workflow->addItemConverter($converter);
-
         $encoding = new CallbackValueConverter(function($item) {
-           return Encoding::toUTF8($item);
+           return Encoding::toLatin1($item);
 
         });
 
@@ -110,7 +180,7 @@ class ImportCommand extends ContainerAwareCommand
                 return null;
             }
 
-            return new \DateTime();
+            return new DateTime();
         });
 
         $workflow->addValueConverter("productName", $encoding);
@@ -132,6 +202,6 @@ class ImportCommand extends ContainerAwareCommand
                 $result->getSuccessCount(),
                 $reader->count() - $result->getSuccessCount()
             )
-        );
+        );*/
     }
 }

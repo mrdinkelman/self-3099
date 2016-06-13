@@ -3,6 +3,8 @@
 namespace ImportBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use ForceUTF8\Encoding;
+use ImportBundle\Helper\DateTime;
 
 /**
  * ProductData
@@ -54,6 +56,11 @@ class ProductData
      */
     private $costInGBP;
 
+    public function __construct()
+    {
+        $this->added = new DateTime();
+    }
+
 
     /**
      * Get id
@@ -73,7 +80,7 @@ class ProductData
      */
     public function setProductName($productName)
     {
-        $this->productName = $productName;
+        $this->productName = Encoding::toLatin1($productName);
 
         return $this;
     }
@@ -96,7 +103,7 @@ class ProductData
      */
     public function setProductDesc($productDesc)
     {
-        $this->productDesc = $productDesc;
+        $this->productDesc = Encoding::toLatin1($productDesc);
 
         return $this;
     }
