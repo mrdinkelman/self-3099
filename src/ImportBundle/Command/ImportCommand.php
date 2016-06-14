@@ -36,7 +36,8 @@ class ImportCommand extends ContainerAwareCommand
                 "Path to import file", "vagrant/task/stock.csv")
             ->addOption(
                 'test-mode', 't', InputOption::VALUE_NONE,
-                "If set, application will not make changes in db");
+                "If set, application will not make changes in db")
+           ->addOption('header', 'h', InputOption::VALUE_OPTIONAL, 0);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -56,7 +57,8 @@ class ImportCommand extends ContainerAwareCommand
             $service->setReader(
                 new CsvReader(
                     new \SplFileObject($input->getOption('file'))
-                )
+                ),
+                $input->getOption('header')
             );
 
             // test mode: just skip doctrine writer creation
@@ -99,6 +101,14 @@ class ImportCommand extends ContainerAwareCommand
         } catch (RuntimeException $ex) {
 
         }
+
+        $successCount = $service->getResult()->getSuccessCount();
+        $totalCount = $service->getReader()->count();
+
+
+
+
+
 
         $output->writeln(
             sprintf(
