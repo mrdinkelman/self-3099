@@ -12,15 +12,19 @@ use Ddeboer\DataImport\Result;
 use Ddeboer\DataImport\Writer\ConsoleProgressWriter;
 use Ddeboer\DataImport\Writer\DoctrineWriter;
 //use ForceUTF8\Encoding;
+use ImportBundle\Exception\FilterException;
 use ImportBundle\Exception\RuntimeException;
 use ImportBundle\Filters\CostAndStockFilter;
 //use ImportBundle\Helper\DateTime;
+use ImportBundle\Helper\ProductData;
 use ImportBundle\ItemConverter\DiscontinuedConverter;
 // use ImportBundle\Services\Import;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+
 //use Symfony\Component\Filesystem\Filesystem;
 //use Symfony\Component\Validator\Validator;
 
@@ -37,28 +41,75 @@ class ImportCommand extends ContainerAwareCommand
             ->addOption(
                 'test-mode', 't', InputOption::VALUE_NONE,
                 "If set, application will not make changes in db")
-           ->addOption('header', 'h', InputOption::VALUE_OPTIONAL, 0);
+       ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln(
-            sprintf(
-                "Starting import for file... %s",
-                $input->getOption('file')
+        $io = new SymfonyStyle($input, $output);
+        $io->title('Hello, I am Symfony SELF-3099 test task and now I will try to run :)');
+
+        $io->section(sprintf("Starting..."));
+
+        $io->text(sprintf("Importing file... %s",  $input->getOption('file')));
+
+        if ($input->getOption('test-mode')) {
+            $io->note("Test mode activated. No real changed in db");
+        }
+
+        $service = $this->getContainer()->get('service.import_csv_service');
+
+        try {
+            $service
+                ->setInputFile(new \SplFileObject($input->getOption('file')))
+                ->setDebug($input->getOption('test-mode', false))
+                ->setHelper(new ProductData())
+                ->execute();
+        } catch (FilterException $ex) {
+            $io->error(sprintf("Oops. Something wrong in filters. Details: %s", $ex->getMessage()));
+
+            return false;
+        }
+
+        if ($service->getWorkflowExceptionsCount()) {
+            $io->section("Exceptions:");
+
+            /**
+             * @var $exception \Exception
+             */
+            foreach ($service->getWorkflowExceptions() as $exception) {
+                $io->text($exception->getMessage());
+            }
+        }
+
+        $io->success(sprintf(
+            "Summary -> Found rows: %s. Filtered: %s. Inserted: %s. Exceptions: %s.",
+                $service->getReaderCount(),
+                $service->getReaderCount() - $service->getSuccessCount(),
+                $service->getSuccessCount(),
+                $service->getWorkflowExceptionsCount()
             )
         );
 
+        $io->text("Have a nice day, bye!");
+
+
+
+/*
         // get service
         $service = $this->getContainer()->get('service.import');
 
         try {
+
+
+
+
             // set reader to service, specify input file
             $service->setReader(
                 new CsvReader(
                     new \SplFileObject($input->getOption('file'))
                 ),
-                $input->getOption('header')
+                0 //$input->getOption('header')
             );
 
             // test mode: just skip doctrine writer creation
@@ -117,7 +168,7 @@ class ImportCommand extends ContainerAwareCommand
                 $service->getResult()->getSuccessCount(),
                 $service->getReader()->count() - $service->getResult()->getSuccessCount()
             )
-        );
+        );*/
 
 
         /*$fs = new Filesystem();

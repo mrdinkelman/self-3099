@@ -37,14 +37,39 @@ class CostAndStockFilter extends BaseFilter implements FilterInterface
         $stock = $item[ $this->stockField ];
 
         if (!is_numeric($cost) || !is_numeric($stock)) {
-            throw new FilterException("Cost or stock values should be numeric");
+            throw new FilterException(
+                sprintf(
+                    "Cost or stock values should be numeric. Given: cost <%s> = '%s', stock <%s> = '%s'",
+                    gettype($cost),
+                    $cost,
+                    gettype($stock),
+                    $stock
+                )
+            );
         }
 
-        if ($cost > $this->minCost && $cost < $this->maxCost && $stock > $this->minStock) {
-            return true;
+        if ($stock < $this->minStock) {
+            $this->setRejectReason(sprintf(
+                "Skipped, because stock amount %s less then %s",
+                $stock,
+                $this->minStock)
+            );
+
+            return false;
         }
 
-        return false;
+        if ($cost < $this->minCost && $cost > $this->maxCost) {
+            $this->setRejectReason(sprintf(
+                "Skipped, because cost '%s' is not included in interval [%s..%s]",
+                $cost,
+                $this->minCost,
+                $this->maxCost)
+            );
+
+            return false;
+        }
+
+        return true;
     }
 
     public function getPriority()
