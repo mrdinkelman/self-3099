@@ -11,6 +11,7 @@ namespace ImportBundle\Helper;
  * See details in interface method
  *
  * @package ImportBundle\Helper
+ * @codeCoverageIgnore
  */
 interface IImport
 {

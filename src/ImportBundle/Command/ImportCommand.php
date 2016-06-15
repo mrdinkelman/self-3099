@@ -4,7 +4,6 @@
  */
 namespace ImportBundle\Command;
 
-use ImportBundle\Exception\FilterException;
 use ImportBundle\Exception\RuntimeException;
 use ImportBundle\Helper\ConsoleHelper;
 use ImportBundle\Helper\ProductData;
@@ -122,5 +121,7 @@ class ImportCommand extends ContainerAwareCommand
         );
 
         $io->text("Have a nice day, bye!");
+
+        return true;
     }
 }
