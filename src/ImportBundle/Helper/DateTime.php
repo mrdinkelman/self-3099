@@ -2,7 +2,7 @@
 
 namespace ImportBundle\Helper;
 
-class DateTime extends \DateTime
+class DateTime extends \DateTime implements \DateTimeInterface
 {
     public function __toString()
     {

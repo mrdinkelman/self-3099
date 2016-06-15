@@ -5,13 +5,13 @@ namespace ImportBundle\Services;
 use Ddeboer\DataImport\ItemConverter\MappingItemConverter;
 use Ddeboer\DataImport\Reader\CsvReader;
 use Ddeboer\DataImport\Reader\ReaderInterface;
-use Ddeboer\DataImport\Result;
 use Ddeboer\DataImport\Writer\ArrayWriter;
 use Ddeboer\DataImport\Writer\ConsoleProgressWriter;
 use Ddeboer\DataImport\Writer\DoctrineWriter;
 use Doctrine\ORM\EntityManager;
 use ImportBundle\Exception\RuntimeException;
 use ImportBundle\Helper\IImport;
+use ImportBundle\Result;
 use ImportBundle\Workflow;
 use Symfony\Component\HttpKernel\Log\LoggerInterface;
 
@@ -174,24 +174,9 @@ class ImportCSVService
         return $this;
     }
 
-    /**
-     * @return boolean
-     */
-    public function isConsoleOutput()
+    public function getWorkflowResult()
     {
-        return $this->consoleOutput;
-    }
-
-    /**
-     * @param boolean $consoleOutput
-     *
-     * @return $this
-     */
-    public function setConsoleOutput($consoleOutput = true)
-    {
-        $this->consoleOutput = (bool) $consoleOutput;
-
-        return $this;
+        return $this->workflowResult;
     }
 
     public function getSuccessCount()
@@ -202,6 +187,11 @@ class ImportCSVService
     public function getTotalProcessedCount()
     {
         return $this->workflowResult->getTotalProcessedCount();
+    }
+
+    public function getReader()
+    {
+        return $this->reader;
     }
 
     public function getReaderCount()
@@ -222,6 +212,8 @@ class ImportCSVService
     public function getWorkflowExceptionsCount(){
         return count($this->getWorkflowExceptions());
     }
+
+
 
 
 

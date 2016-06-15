@@ -71,198 +71,54 @@ class ImportCommand extends ContainerAwareCommand
             return false;
         }
 
-        if ($service->getWorkflowExceptionsCount()) {
-            $io->section("Exceptions:");
+        if ($errors = $service->getReader()->getErrors()) {
+            $io->section("Reader errors:");
+
+            foreach ($errors as $row => $error) {
+                $io->text(
+                    sprintf(
+                        "Row %3s: Error during reading, row data: %s",
+                        $row,
+                        json_encode($error))
+                );
+            }
+        }
+
+        if ($filtered = $service->getWorkflowResult()->getFiltered()) {
+            $io->section("Not accepted rows by filters:");
+
+            foreach ($filtered as $row => $reason) {
+                $io->text(sprintf("Row %3s: [Filtered] %s", $row, $reason));
+            }
+        }
+
+        if ($exceptions = $service->getWorkflowResult()->getExceptions()) {
+            $io->section("Filter's Exceptions:");
 
             /**
              * @var $exception \Exception
              */
-            foreach ($service->getWorkflowExceptions() as $exception) {
-                $io->text($exception->getMessage());
+            foreach ($exceptions as $row => $exception) {
+                $io->text(sprintf("Row %3s: [Exception] %s", $row, $exception->getMessage()));
             }
         }
 
+        $totalRows = $service->getReader()->count();
+        $readerErrors = count($service->getReader()->getErrors());
+        $success = $service->getWorkflowResult()->getSuccessCount();
+        $exceptions = count($service->getWorkflowResult()->getExceptions());
+        $filtered = $totalRows - $readerErrors - $success - $exceptions;
+
         $io->success(sprintf(
-            "Summary -> Found rows: %s. Filtered: %s. Inserted: %s. Exceptions: %s.",
-                $service->getReaderCount(),
-                $service->getReaderCount() - $service->getSuccessCount(),
-                $service->getSuccessCount(),
-                $service->getWorkflowExceptionsCount()
+            "Summary -> Rows: total - %s, with errors - %s. Filtered: by rules - %s, by exceptions - %s. Inserted - %s",
+                $totalRows,
+                count($service->getReader()->getErrors()),
+                $filtered,
+                $exceptions,
+                $success
             )
         );
 
         $io->text("Have a nice day, bye!");
-
-
-
-/*
-        // get service
-        $service = $this->getContainer()->get('service.import');
-
-        try {
-
-
-
-
-            // set reader to service, specify input file
-            $service->setReader(
-                new CsvReader(
-                    new \SplFileObject($input->getOption('file'))
-                ),
-                0 //$input->getOption('header')
-            );
-
-            // test mode: just skip doctrine writer creation
-            if (!$input->getOption('test-mode')) {
-                $service->addWriter(
-                    new DoctrineWriter(
-                        $this->getContainer()->get('doctrine')->getEntityManager(),
-                        'ImportBundle:ProductData'
-                    )
-                );
-            } else {
-                $output->writeln("Note: Command working in test-mode. No changes in db produced!");
-            }
-
-            $service->addWriter(
-                new ConsoleProgressWriter($output, $service->getReader())
-            );
-
-            // filters for columns
-            $service->addFilter(new CostAndStockFilter('Cost in GBP', 'Stock'));
-
-            // columns mapping
-            $service->setItemConverter(
-                new MappingItemConverter(
-                    [
-                        'Product Code' => 'productCode',
-                        'Product Name' => 'productName',
-                        'Product Description' => 'productDesc',
-                        'Stock' => 'stock',
-                        'Cost in GBP' => 'costInGBP',
-                        'Discontinued' => 'discontinued'
-                    ]
-                )
-            );
-
-            // extra value conversions
-            $service->addValueConverter("discontinued", new DiscontinuedConverter());
-
-            $service->process();
-        } catch (RuntimeException $ex) {
-
-        }
-
-        $successCount = $service->getResult()->getSuccessCount();
-        $totalCount = $service->getReader()->count();
-
-
-
-
-
-
-        $output->writeln(
-            sprintf(
-                "\nResult: Total - %s, Success: %s, Skipped: %s",
-                $service->getReader()->count(),
-                $service->getResult()->getSuccessCount(),
-                $service->getReader()->count() - $service->getResult()->getSuccessCount()
-            )
-        );*/
-
-
-        /*$fs = new Filesystem();
-
-        if (!$fs->exists($input->getOption('file'))) {
-            throw new RuntimeException(sprintf("File %s doesn't exists", $input->getOption('file')));
-        }
-
-        $file = new \SplFileObject($input->getOption('file'));
-
-        $reader = new CsvReader($file);
-
-        $output->writeln(sprintf("Importing %s...", $file->getBasename()));
-
-        $reader->setHeaderRowNumber(0);
-
-        $workflow = new Workflow($reader);
-
-        $entityManager = $this->getContainer()->get('doctrine')->getEntityManager();
-
-        $writer = new DoctrineWriter($entityManager, 'ImportBundle:ProductData');
-
-        if ($input->getOption('test-mode')) {
-            $testData = array();
-
-            $writer = new ArrayWriter($testData);
-        }
-
-        $workflow->addWriter($writer);
-
-        $converter = new MappingItemConverter(
-            [
-                'Product Code' => 'productCode',
-                'Product Name' => 'productName',
-                'Product Description' => 'productDesc',
-                'Stock' => 'stock',
-                'Cost in GBP' => 'costInGBP',
-                'Discontinued' => 'discontinued'
-            ]
-        );
-
-        $workflow->addItemConverter($converter);
-
-        $workflow->setSkipItemOnFailure(true);
-
-        $skipped = array();
-
-        $workflow->addFilter(
-            new CallbackFilter(function ($data) use (&$skipped, $reader) {
-                if (is_numeric($data['Cost in GBP'])
-                    && is_numeric($data['Stock'])
-                    && ($data['Cost in GBP'] > 5 && $data['Cost in GBP'] < 1000)
-                    && $data['Stock'] > 10
-                ) {
-                    return true;
-                }
-
-                array_push($skipped, $reader->current());
-                return false;
-            })
-        );
-
-        $encoding = new CallbackValueConverter(function($item) {
-           return Encoding::toLatin1($item);
-
-        });
-
-        $discontinued =  new CallbackValueConverter(function ($item) {
-            if (empty($item)) {
-                return null;
-            }
-
-            return new DateTime();
-        });
-
-        $workflow->addValueConverter("productName", $encoding);
-        $workflow->addValueConverter("productDesc", $encoding);
-        $workflow->addValueConverter("discontinued", $discontinued);
-
-        $result = $workflow->process();
-
-        if ($skipped) {
-            foreach ($skipped as $data) {
-                $output->writeln(sprintf("[Skipped]: %s", implode(" : ", $data)));
-            }
-        }
-
-        $output->writeln(
-            sprintf(
-                "Done: Total - %s, Success: %s, Skipped: %s",
-                $reader->count(),
-                $result->getSuccessCount(),
-                $reader->count() - $result->getSuccessCount()
-            )
-        );*/
     }
 }

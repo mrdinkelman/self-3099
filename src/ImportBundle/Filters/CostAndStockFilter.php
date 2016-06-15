@@ -39,7 +39,7 @@ class CostAndStockFilter extends BaseFilter implements FilterInterface
         if (!is_numeric($cost) || !is_numeric($stock)) {
             throw new FilterException(
                 sprintf(
-                    "Cost or stock values should be numeric. Given: cost <%s> = '%s', stock <%s> = '%s'",
+                    "Cost or stock values should be numeric, not empty. Given: cost <%s> = '%s', stock <%s> = '%s'",
                     gettype($cost),
                     $cost,
                     gettype($stock),
@@ -48,26 +48,31 @@ class CostAndStockFilter extends BaseFilter implements FilterInterface
             );
         }
 
-        if ($stock < $this->minStock) {
+        if ($cost > $this->maxCost) {
             $this->setRejectReason(sprintf(
-                "Skipped, because stock amount %s less then %s",
-                $stock,
-                $this->minStock)
-            );
-
-            return false;
-        }
-
-        if ($cost < $this->minCost && $cost > $this->maxCost) {
-            $this->setRejectReason(sprintf(
-                "Skipped, because cost '%s' is not included in interval [%s..%s]",
+                "Cost '%s' greater then '%s' defined in filter rules ",
                 $cost,
-                $this->minCost,
-                $this->maxCost)
+                $this->maxCost
+            ));
+
+            return false;
+        }
+
+        if ($cost < $this->minCost && $stock < $this->minStock) {
+            $this->setRejectReason(
+                sprintf(
+                    "Cost = '%s' and stock = '%s' don't match with filter rules: min cost = '%s', min stock = '%s'",
+                    $cost,
+                    $stock,
+                    $this->minCost,
+                    $this->minStock
+                )
             );
 
             return false;
         }
+
+
 
         return true;
     }
