@@ -1,72 +1,110 @@
 <?php
-
+/**
+ * PHP version: 5.6+
+ */
 namespace ImportBundle\Services;
 
 use Ddeboer\DataImport\ItemConverter\MappingItemConverter;
 use Ddeboer\DataImport\Reader\CsvReader;
 use Ddeboer\DataImport\Reader\ReaderInterface;
 use Ddeboer\DataImport\Writer\ArrayWriter;
-use Ddeboer\DataImport\Writer\ConsoleProgressWriter;
 use Ddeboer\DataImport\Writer\DoctrineWriter;
 use Doctrine\ORM\EntityManager;
+use ImportBundle\Exception\FilterException;
 use ImportBundle\Exception\RuntimeException;
 use ImportBundle\Helper\IImport;
 use ImportBundle\Result;
 use ImportBundle\Workflow;
 use Symfony\Component\HttpKernel\Log\LoggerInterface;
 
+/**
+ * Class ImportCSVService
+ *
+ * General service for import customer CSV file and insert records from it
+ * in database.
+ *
+ * Debug mode means - no changes in real db, just emulate all process but
+ * without writing
+ *
+ * Normal workflow:
+ * - set file
+ * - set helper
+ * - [optional] set logger
+ * - [optional] set debug mode
+ * - execute
+ *
+ * and working with result in your class logic.
+ *
+ * @package ImportBundle\Services
+ */
 class ImportCSVService
 {
+    /**
+     * Input file for import
+     * @var \SplFileObject
+     */
     protected $inputFile;
 
+    /**
+     * Debug mode, switched off by default
+     * @var bool
+     */
     protected $debug = false;
 
+    /**
+     * Logger, if needed
+     * @var null
+     */
     protected $logger = null;
 
-    protected $consoleOutput = true;
-
+    /**
+     * Doctrine entity manager
+     *
+     * @var EntityManager
+     */
     protected $entityManager;
 
-    protected $exceptions = array();
-
-    protected $filtered = array();
-
     /**
-     * @var ReaderInterface|CsvReader
-     */
-    protected $reader;
-
-    /**
-     * @var Result
-     */
-    protected $workflowResult;
-
-    public function __construct(EntityManager $entityManager)
-    {
-        $this->entityManager = $entityManager;
-    }
-
-    /**
+     * Helper with import rules, filters, mappings and etc
      *
      * @var IImport
      */
     protected $helper;
 
     /**
-     * @return mixed
+     * Reader, main ideas see https://github.com/ddeboer/DdeboerDataImportBundle
+     *
+     * @var ReaderInterface|CsvReader
      */
-    public function getInputFile()
+    protected $reader;
+
+    /**
+     * Workflow, main ideas see https://github.com/ddeboer/DdeboerDataImportBundle
+     *
+     * @var Result
+     */
+    protected $workflowResult;
+
+    /**
+     * ImportCSVService constructor.
+     *
+     * @param EntityManager $entityManager
+     */
+    public function __construct(EntityManager $entityManager)
     {
-        return $this->inputFile;
+        $this->entityManager = $entityManager;
     }
 
     /**
+     * Set file for input and verify that file exists
+     *
      * @param \SplFileObject $inputFile
      *
      * @return $this
      */
     public function setInputFile(\SplFileObject $inputFile)
     {
+        // verification
         if (!$inputFile->isFile()) {
             throw new RuntimeException("Unable to add or read file $inputFile");
         }
@@ -77,14 +115,18 @@ class ImportCSVService
     }
 
     /**
+     * Return input file
+     *
      * @return mixed
      */
-    public function getDebug()
+    public function getInputFile()
     {
-        return $this->debug;
+        return $this->inputFile;
     }
 
     /**
+     * Set debug mode
+     *
      * @param bool $debug
      *
      * @return $this
@@ -97,14 +139,18 @@ class ImportCSVService
     }
 
     /**
+     * Get marker state for debug mode
+     *
      * @return mixed
      */
-    public function getHelper()
+    public function getDebug()
     {
-        return $this->helper;
+        return $this->debug;
     }
 
     /**
+     * Set helper for import process
+     *
      * @param IImport $helper
      *
      * @return $this
@@ -116,13 +162,64 @@ class ImportCSVService
         return $this;
     }
 
+    /**
+     * Get current helper
+     *
+     * @return mixed
+     */
+    public function getHelper()
+    {
+        return $this->helper;
+    }
+
+    /**
+     * Set logger
+     *
+     * @param LoggerInterface $logger
+     *
+     * @return $this
+     */
+    public function setLogger(LoggerInterface $logger = null)
+    {
+        $this->logger = $logger;
+
+        return $this;
+    }
+
+    /**
+     * Get logger
+     *
+     * @return mixed
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+
+    /**
+     * Execute import
+     * Base ideas for workflow, just see https://github.com/ddeboer/DdeboerDataImportBundle
+     *
+     * @return $this
+     *
+     * @throws RuntimeException
+     */
     public function execute()
     {
+        // validate normal workflow, don't allow call execute
+        // without setting file or helper
+        if (!$this->inputFile || !$this->helper) {
+            throw new RuntimeException("Wrong call. Please set-up input file and helper first.");
+        }
+
+        // set reader and init them
         $this->reader = new CsvReader($this->inputFile);
         $this->reader->setHeaderRowNumber($this->helper->getHeadersPosition());
 
+        // init workflow
         $workflow = new Workflow($this->reader, $this->logger);
 
+        // emulate writing in debug mode
         if ($this->debug) {
             $testData = [];
 
@@ -138,87 +235,44 @@ class ImportCSVService
             );
         }
 
+        // filter values
         foreach ($this->helper->getFilters() as $filter) {
             $workflow->addFilter($filter);
         }
 
+        // convert values
         foreach ($this->helper->getValueConverters() as $field => $valueConverter) {
             $workflow->addValueConverter($field, $valueConverter);
         }
 
+        // set mapping
         $workflow->addItemConverter(new MappingItemConverter($this->helper->getMapping()));
         $workflow->setSkipItemOnFailure(true);
 
+        // process
         $this->workflowResult = $workflow->process();
 
         return $this;
     }
 
     /**
-     * @return mixed
-     */
-    public function getLogger()
-    {
-        return $this->logger;
-    }
-
-    /**
-     * @param LoggerInterface $logger
+     * Get import result as workflow.
      *
-     * @return $this
+     * @return Result
      */
-    public function setLogger(LoggerInterface $logger = null)
-    {
-        $this->logger = $logger;
-
-        return $this;
-    }
-
     public function getWorkflowResult()
     {
         return $this->workflowResult;
     }
 
-    public function getSuccessCount()
-    {
-        return $this->workflowResult->getSuccessCount();
-    }
-
-    public function getTotalProcessedCount()
-    {
-        return $this->workflowResult->getTotalProcessedCount();
-    }
-
+    /**
+     * Get reader. Useful for getting info about wrong or
+     * corrupted rows
+     *
+     * @return CsvReader|ReaderInterface
+     */
     public function getReader()
     {
         return $this->reader;
     }
-
-    public function getReaderCount()
-    {
-        return $this->reader->count();
-    }
-
-    public function hasErrors()
-    {
-        return $this->workflowResult->hasErrors();
-    }
-
-    public function getWorkflowExceptions()
-    {
-        return $this->workflowResult->getExceptions();
-    }
-
-    public function getWorkflowExceptionsCount(){
-        return count($this->getWorkflowExceptions());
-    }
-
-
-
-
-
-
-
-
-
 }

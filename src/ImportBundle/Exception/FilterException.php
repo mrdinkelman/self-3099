@@ -1,14 +1,19 @@
 <?php
-
+/**
+ * PHP version: 5.6+
+ */
 namespace ImportBundle\Exception;
 
 use Ddeboer\DataImport\Exception\ExceptionInterface;
 use Ddeboer\DataImport\Exception\ReaderException;
 
+/**
+ * Class FilterException
+ * Adding custom exception for filters.
+ *
+ * @package ImportBundle\Exception
+ */
 class FilterException extends ReaderException implements ExceptionInterface
 {
-    public function __construct($message, $code = 0, \RuntimeException $previous = null)
-    {
-        parent::__construct($message, $code, $previous);
-    }
+
 }

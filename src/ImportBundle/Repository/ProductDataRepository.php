@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * PHP version: 5.6+
+ */
 namespace ImportBundle\Repository;
 
 /**
@@ -10,4 +12,5 @@ namespace ImportBundle\Repository;
  */
 class ProductDataRepository extends \Doctrine\ORM\EntityRepository
 {
+
 }

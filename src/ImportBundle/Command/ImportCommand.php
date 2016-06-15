@@ -1,62 +1,69 @@
 <?php
-
+/**
+ * PHP version: 5.6+
+ */
 namespace ImportBundle\Command;
 
-//use Ddeboer\DataImport\Filter\CallbackFilter;
-use Ddeboer\DataImport\ItemConverter\MappingItemConverter;
-use Ddeboer\DataImport\Reader\CsvReader;
-//use Ddeboer\DataImport\ValueConverter\CallbackValueConverter;
-//use Ddeboer\DataImport\Workflow;
-//use Ddeboer\DataImport\Writer\ArrayWriter;
-use Ddeboer\DataImport\Result;
-use Ddeboer\DataImport\Writer\ConsoleProgressWriter;
-use Ddeboer\DataImport\Writer\DoctrineWriter;
-//use ForceUTF8\Encoding;
 use ImportBundle\Exception\FilterException;
 use ImportBundle\Exception\RuntimeException;
-use ImportBundle\Filters\CostAndStockFilter;
-//use ImportBundle\Helper\DateTime;
+use ImportBundle\Helper\ConsoleHelper;
 use ImportBundle\Helper\ProductData;
-use ImportBundle\ItemConverter\DiscontinuedConverter;
-// use ImportBundle\Services\Import;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-//use Symfony\Component\Filesystem\Filesystem;
-//use Symfony\Component\Validator\Validator;
-
+/**
+ * Class ImportCommand
+ *
+ * @package ImportBundle\Command
+ */
 class ImportCommand extends ContainerAwareCommand
 {
+    /**
+     * Configure command line properties and default values
+     */
     protected function configure()
     {
-       $this
-            ->setName("import:do")
+        $this
+            ->setName("import:products") // can be cached
             ->setDescription("SELF-3099 simple console application")
             ->addOption(
                 'file', 'f', InputOption::VALUE_OPTIONAL,
-                "Path to import file", "vagrant/task/stock.csv")
+                "Path to import file", "vagrant/task/stock.csv"
+            ) // default file from package
             ->addOption(
                 'test-mode', 't', InputOption::VALUE_NONE,
-                "If set, application will not make changes in db")
-       ;
+                "If set, application will not make changes in db"
+            ) // deactivated by default
+        ;
     }
 
+    /**
+     * Command execution
+     *
+     * @param InputInterface  $input  input interface
+     * @param OutputInterface $output output interface
+     *
+     * @return bool
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // init style output
         $io = new SymfonyStyle($input, $output);
+
+        // set general messages
         $io->title('Hello, I am Symfony SELF-3099 test task and now I will try to run :)');
-
         $io->section(sprintf("Starting..."));
-
         $io->text(sprintf("Importing file... %s",  $input->getOption('file')));
 
+        // test mode activated, tell user about it
         if ($input->getOption('test-mode')) {
             $io->note("Test mode activated. No real changed in db");
         }
 
+        // get service and try to run import process
         $service = $this->getContainer()->get('service.import_csv_service');
 
         try {
@@ -65,54 +72,49 @@ class ImportCommand extends ContainerAwareCommand
                 ->setDebug($input->getOption('test-mode', false))
                 ->setHelper(new ProductData())
                 ->execute();
-        } catch (FilterException $ex) {
-            $io->error(sprintf("Oops. Something wrong in filters. Details: %s", $ex->getMessage()));
+        } catch (RuntimeException $ex) {
+            $io->error(
+                sprintf(
+                    "Oops. Something wrong with logic inside bundle. Details: %s",
+                    $ex->getMessage()
+                )
+            );
+
+            return false;
+        } catch (\RuntimeException $ex) {
+            $io->error(
+                sprintf(
+                    "Oops. Something wrong. Details: %s",
+                    $ex->getMessage()
+                )
+            );
 
             return false;
         }
 
-        if ($errors = $service->getReader()->getErrors()) {
-            $io->section("Reader errors:");
+        // pass creation info about actions to small helper
+        $helper = new ConsoleHelper(
+            $io,
+            $service->getReader()->getErrors(),
+            $service->getWorkflowResult()->getFiltered(),
+            $service->getWorkflowResult()->getExceptions()
+        );
+        $helper->printInfo();
 
-            foreach ($errors as $row => $error) {
-                $io->text(
-                    sprintf(
-                        "Row %3s: Error during reading, row data: %s",
-                        $row,
-                        json_encode($error))
-                );
-            }
-        }
 
-        if ($filtered = $service->getWorkflowResult()->getFiltered()) {
-            $io->section("Not accepted rows by filters:");
-
-            foreach ($filtered as $row => $reason) {
-                $io->text(sprintf("Row %3s: [Filtered] %s", $row, $reason));
-            }
-        }
-
-        if ($exceptions = $service->getWorkflowResult()->getExceptions()) {
-            $io->section("Filter's Exceptions:");
-
-            /**
-             * @var $exception \Exception
-             */
-            foreach ($exceptions as $row => $exception) {
-                $io->text(sprintf("Row %3s: [Exception] %s", $row, $exception->getMessage()));
-            }
-        }
-
+        // summary info, can be moved to helper if needed in future
         $totalRows = $service->getReader()->count();
         $readerErrors = count($service->getReader()->getErrors());
         $success = $service->getWorkflowResult()->getSuccessCount();
         $exceptions = count($service->getWorkflowResult()->getExceptions());
-        $filtered = $totalRows - $readerErrors - $success - $exceptions;
+        $filtered = count($service->getWorkflowResult()->getFiltered());
 
-        $io->success(sprintf(
-            "Summary -> Rows: total - %s, with errors - %s. Filtered: by rules - %s, by exceptions - %s. Inserted - %s",
+        $io->success(
+            sprintf(
+                "Summary -> Rows: total - %s, with errors - %s. " .
+                "Filtered: by rules - %s, by exceptions - %s. Inserted - %s",
                 $totalRows,
-                count($service->getReader()->getErrors()),
+                $readerErrors,
                 $filtered,
                 $exceptions,
                 $success
