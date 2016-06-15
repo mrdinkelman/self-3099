@@ -1,59 +1,78 @@
 <?php
-
+/**
+ * PHP version: 5.6+
+ */
 namespace ImportBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use ForceUTF8\Encoding;
 
 /**
- * ProductData
+ * ProductData table
  */
 class ProductData
 {
     /**
+     * ID
      * @var integer
      */
     private $id;
 
     /**
+     * Product name
      * @var string
      */
     private $productName;
 
     /**
+     * Product description
      * @var string
      */
     private $productDesc;
 
     /**
+     * Product code
      * @var string
      */
     private $productCode;
 
     /**
+     * Added datetime
      * @var \DateTime
      */
     private $added;
 
     /**
+     * Discontinued datetime
      * @var \DateTime
      */
     private $discontinued;
 
     /**
+     * Update timestamp
      * @var \DateTime
      */
     private $timestamp;
 
     /**
+     * Current stock value
      * @var integer
      */
     private $stock;
 
     /**
+     * Current cost in pounds (GBP)
      * @var string
      */
     private $costInGBP;
 
+    /**
+     * ProductData constructor.
+     */
+    public function __construct()
+    {
+        $this->added = new \DateTime(); // init added property with default value
+    }
 
     /**
      * Get id
@@ -69,11 +88,12 @@ class ProductData
      * Set productName
      *
      * @param string $productName
+     *
      * @return ProductData
      */
     public function setProductName($productName)
     {
-        $this->productName = $productName;
+        $this->productName = Encoding::toLatin1($productName);
 
         return $this;
     }
@@ -92,11 +112,12 @@ class ProductData
      * Set productDesc
      *
      * @param string $productDesc
+     *
      * @return ProductData
      */
     public function setProductDesc($productDesc)
     {
-        $this->productDesc = $productDesc;
+        $this->productDesc = Encoding::toLatin1($productDesc);
 
         return $this;
     }
@@ -115,6 +136,7 @@ class ProductData
      * Set productCode
      *
      * @param string $productCode
+     *
      * @return ProductData
      */
     public function setProductCode($productCode)
@@ -138,6 +160,7 @@ class ProductData
      * Set added
      *
      * @param \DateTime $added
+     *
      * @return ProductData
      */
     public function setAdded($added)
@@ -161,6 +184,7 @@ class ProductData
      * Set discontinued
      *
      * @param \DateTime $discontinued
+     *
      * @return ProductData
      */
     public function setDiscontinued($discontinued)
@@ -184,6 +208,7 @@ class ProductData
      * Set timestamp
      *
      * @param \DateTime $timestamp
+     *
      * @return ProductData
      */
     public function setTimestamp($timestamp)
@@ -207,6 +232,7 @@ class ProductData
      * Set stock
      *
      * @param integer $stock
+     *
      * @return ProductData
      */
     public function setStock($stock)
@@ -230,6 +256,7 @@ class ProductData
      * Set costInGBP
      *
      * @param string $costInGBP
+     *
      * @return ProductData
      */
     public function setCostInGBP($costInGBP)

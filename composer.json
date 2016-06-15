@@ -27,7 +27,9 @@
         "ddeboer/data-import": "@stable",
         "doctrine/doctrine-migrations-bundle": "^1.1",
         "symfony/validator": "^3.0",
-        "neitanod/forceutf8": "^2.0"
+        "neitanod/forceutf8": "^2.0",
+        "symfony/filesystem": "^3.1",
+        "ddeboer/data-import-bundle": "^0.1.0"
     },
     "require-dev": {
         "sensio/generator-bundle": "~3.0",

@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * PHP version: 5.6+
+ */
 namespace ImportBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -10,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="tblMigrationVersions")
  * @ORM\Entity
  */
-class Tblmigrationversions
+class MigrationVersions
 {
     /**
      * @var string

@@ -1,4 +1,4 @@
-ImportBundle\Entity\Tblmigrationversions:
+ImportBundle\Entity\MigrationVersions:
     type: entity
     table: tblMigrationVersions
     id:

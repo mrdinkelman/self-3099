@@ -26,7 +26,7 @@ class Version20160527165503 extends AbstractMigration
     {
         // platform checking
         if ($this->connection->getDatabasePlatform()->getName() != 'mysql') {
-            $this->abortIf(true, "Migration [UP} can only be executed safely on 'mysql'");
+            $this->abortIf(true, "Migration [UP] can be executed safely on 'mysql'");
         }
     }
 
@@ -37,12 +37,10 @@ class Version20160527165503 extends AbstractMigration
      */
     public function up(Schema $schema)
     {
-        $this->addSql(
-            "
+        $this->addSql("
           ALTER TABLE `tblProductData`
             ADD COLUMN `intStock` INT NOT NULL AFTER `stmTimestamp`,
-            ADD COLUMN `floatCostInGBP` DECIMAL(15,2) NOT NULL AFTER `intStock`;
-        "
+            ADD COLUMN `floatCostInGBP` DECIMAL(15,2) NOT NULL AFTER `intStock`"
         );
 
     }
@@ -58,7 +56,7 @@ class Version20160527165503 extends AbstractMigration
     {
         // platform checking
         if ($this->connection->getDatabasePlatform()->getName() != 'mysql') {
-            $this->abortIf(true, "Migration [DOWN] can only be executed safely on 'mysql'");
+            $this->abortIf(true, "Migration [DOWN] can be executed safely on 'mysql'");
         }
     }
 
@@ -69,12 +67,10 @@ class Version20160527165503 extends AbstractMigration
      */
     public function down(Schema $schema)
     {
-        $this->addSql(
-            "
-            ALTER TABLE `tblProductData`
+        $this->addSql("
+          ALTER TABLE `tblProductData`
               DROP COLUMN `intStock`,
-              DROP COLUMN `floatCostInGBP`;
-        "
+              DROP COLUMN `floatCostInGBP`"
         );
     }
 }
