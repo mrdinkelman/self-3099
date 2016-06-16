@@ -10,7 +10,6 @@ use Ddeboer\DataImport\Reader\ReaderInterface;
 use Ddeboer\DataImport\Writer\ArrayWriter;
 use Ddeboer\DataImport\Writer\DoctrineWriter;
 use Doctrine\ORM\EntityManager;
-use ImportBundle\Exception\FilterException;
 use ImportBundle\Exception\RuntimeException;
 use ImportBundle\Helper\IImport;
 use ImportBundle\Result;
@@ -105,7 +104,7 @@ class ImportCSVService
     public function setInputFile(\SplFileObject $inputFile)
     {
         // verification
-        if (!$inputFile->isFile()) {
+        if (!$inputFile->isFile() || strtolower($inputFile->getExtension() != 'csv')) {
             throw new RuntimeException("Unable to add or read file $inputFile");
         }
 
@@ -118,6 +117,7 @@ class ImportCSVService
      * Return input file
      *
      * @return mixed
+     * @codeCoverageIgnore
      */
     public function getInputFile()
     {
@@ -142,6 +142,7 @@ class ImportCSVService
      * Get marker state for debug mode
      *
      * @return mixed
+     * @codeCoverageIgnore
      */
     public function getDebug()
     {
@@ -166,6 +167,7 @@ class ImportCSVService
      * Get current helper
      *
      * @return mixed
+     * @codeCoverageIgnore
      */
     public function getHelper()
     {
@@ -178,6 +180,7 @@ class ImportCSVService
      * @param LoggerInterface $logger
      *
      * @return $this
+     * @codeCoverageIgnore
      */
     public function setLogger(LoggerInterface $logger = null)
     {
@@ -190,6 +193,7 @@ class ImportCSVService
      * Get logger
      *
      * @return mixed
+     * @codeCoverageIgnore
      */
     public function getLogger()
     {
@@ -219,19 +223,20 @@ class ImportCSVService
         // init workflow
         $workflow = new Workflow($this->reader, $this->logger);
 
+        $workflow->addWriter(
+            new DoctrineWriter(
+                $this->entityManager,
+                $this->helper->getDestinationEntity()
+            )
+        );
+
         // emulate writing in debug mode
         if ($this->debug) {
+            $workflow->clearWriters();
             $testData = [];
 
             $workflow->addWriter(
                 new ArrayWriter($testData)
-            );
-        } else {
-            $workflow->addWriter(
-                new DoctrineWriter(
-                    $this->entityManager,
-                    $this->helper->getDestinationEntity()
-                )
             );
         }
 

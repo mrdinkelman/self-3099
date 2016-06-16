@@ -16,6 +16,8 @@ use Symfony\Component\HttpKernel\Log\LoggerInterface;
  */
 class Workflow extends \Ddeboer\DataImport\Workflow
 {
+    const MESS_UNKNOWN_REASON = "Unknown reason";
+
     /**
      * Collection of filtered rows
      * @var array
@@ -45,7 +47,7 @@ class Workflow extends \Ddeboer\DataImport\Workflow
 
                 // another filer from the box. We don't know about reason
                 // whey value was not pass filter validation
-                $this->filtered[$this->reader->key()] = "Unknown reason";
+                $this->filtered[$this->reader->key()] = self::MESS_UNKNOWN_REASON;
                 return false;
             }
         }
@@ -75,5 +77,17 @@ class Workflow extends \Ddeboer\DataImport\Workflow
             $result->getExceptions(),
             $this->filtered
         );
+    }
+
+    /**
+     * Small helper: Clear writers
+     *
+     * @return $this
+     */
+    public function clearWriters()
+    {
+        $this->writers = array();
+
+        return $this;
     }
 }

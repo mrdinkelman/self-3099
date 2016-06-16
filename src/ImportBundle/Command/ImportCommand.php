@@ -20,6 +20,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 class ImportCommand extends ContainerAwareCommand
 {
+    const CODE_SUCCESS = 0;
+    const CODE_IMPORT_EXC = -1;
+    const CODE_GENERAL_EXC = -2;
+
     /**
      * Configure command line properties and default values
      */
@@ -30,7 +34,7 @@ class ImportCommand extends ContainerAwareCommand
             ->setDescription("SELF-3099 simple console application")
             ->addOption(
                 'file', 'f', InputOption::VALUE_OPTIONAL,
-                "Path to import file", "vagrant/task/stock.csv"
+                "Path to import file", dirname(__FILE__)."/../../../vagrant/task/stock.csv"
             ) // default file from package
             ->addOption(
                 'test-mode', 't', InputOption::VALUE_NONE,
@@ -72,6 +76,8 @@ class ImportCommand extends ContainerAwareCommand
                 ->setHelper(new ProductData())
                 ->execute();
         } catch (RuntimeException $ex) {
+            // @codeCoverageIgnoreStart
+            // exceptions from service already covered in service test
             $io->error(
                 sprintf(
                     "Oops. Something wrong with logic inside bundle. Details: %s",
@@ -79,7 +85,8 @@ class ImportCommand extends ContainerAwareCommand
                 )
             );
 
-            return false;
+            return self::CODE_IMPORT_EXC;
+            // @codeCoverageIgnoreEnd
         } catch (\RuntimeException $ex) {
             $io->error(
                 sprintf(
@@ -88,7 +95,7 @@ class ImportCommand extends ContainerAwareCommand
                 )
             );
 
-            return false;
+            return self::CODE_GENERAL_EXC;
         }
 
         // pass creation info about actions to small helper
@@ -122,6 +129,6 @@ class ImportCommand extends ContainerAwareCommand
 
         $io->text("Have a nice day, bye!");
 
-        return true;
+        return self::CODE_SUCCESS;
     }
 }
