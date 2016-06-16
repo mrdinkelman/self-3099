@@ -1,0 +1,5 @@
+services:
+  service.import_csv_service:
+    class: ImportBundle\Services\ImportCSVService
+    arguments: [ "@doctrine.orm.entity_manager", "@service_container" ]
+

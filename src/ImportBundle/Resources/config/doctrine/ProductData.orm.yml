@@ -1,0 +1,60 @@
+ImportBundle\Entity\ProductData:
+    type: entity
+    table: tblProductData
+    uniqueConstraints:
+        productCode:
+            columns:
+                - strProductCode
+    id:
+        id:
+            type: integer
+            nullable: false
+            unsigned: true
+            id: true
+            column: intProductDataId
+            generator:
+                strategy: IDENTITY
+    fields:
+        productName:
+            type: string
+            nullable: false
+            length: 50
+            fixed: false
+            column: strProductName
+        productDesc:
+            type: string
+            nullable: false
+            length: 255
+            fixed: false
+            column: strProductDesc
+        productCode:
+            type: string
+            nullable: false
+            length: 10
+            fixed: false
+            column: strProductCode
+        added:
+            type: datetime
+            nullable: true
+            column: dtmAdded
+        discontinued:
+            type: datetime
+            nullable: true
+            column: dtmDiscontinued
+        timestamp:
+            type: datetime
+            nullable: false
+            default: CURRENT_TIMESTAMP
+            column: stmTimestamp
+        stock:
+            type: integer
+            nullable: false
+            unsigned: false
+            column: intStock
+        costInGBP:
+            type: decimal
+            nullable: false
+            precision: 15
+            scale: 2
+            column: floatCostInGBP
+    lifecycleCallbacks: {  }

@@ -20,7 +20,16 @@
         "symfony/monolog-bundle": "~2.4",
         "sensio/distribution-bundle": "~5.0",
         "sensio/framework-extra-bundle": "^3.0.2",
-        "incenteev/composer-parameter-handler": "~2.0"
+        "incenteev/composer-parameter-handler": "~2.0",
+        "symfony/finder": "^3.0",
+        "symfony/console": "2.8.6",
+        "phpunit/phpunit": "^5.3",
+        "ddeboer/data-import": "@stable",
+        "doctrine/doctrine-migrations-bundle": "^1.1",
+        "symfony/validator": "^3.0",
+        "neitanod/forceutf8": "^2.0",
+        "symfony/filesystem": "^3.1",
+        "ddeboer/data-import-bundle": "^0.1.0"
     },
     "require-dev": {
         "sensio/generator-bundle": "~3.0",
