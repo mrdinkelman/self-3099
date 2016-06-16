@@ -27,6 +27,7 @@ class MigrationVersions
 
     /**
      * Get version
+     * @codeCoverageIgnore
      *
      * @return string 
      */

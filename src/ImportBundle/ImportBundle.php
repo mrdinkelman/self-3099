@@ -9,6 +9,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 /**
  * Class ImportBundle
  * @package ImportBundle
+ * @codeCoverageIgnore
  */
 class ImportBundle extends Bundle
 {

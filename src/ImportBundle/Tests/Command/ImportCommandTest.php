@@ -15,14 +15,15 @@ class ImportCommandTest extends KernelTestCase
         $kernel->boot();
 
         $application = new Application($kernel);
-        $application->add(new ImportCommand());
+        $command = new ImportCommand();
+        $application->add($command);
 
-        $command = $application->find('import:import');
+        $command = $application->find('import:products');
 
+        // success
         $commandTest = new CommandTester($command);
-        $commandTest->execute(array());
+        $this->assertEquals(ImportCommand::CODE_SUCCESS, $commandTest->execute(['--test-mode' => 1]));
 
-        $this->assertContains("Hello, I'm a first console application", $commandTest->getDisplay());
-
+        $this->assertEquals(ImportCommand::CODE_GENERAL_EXC, $commandTest->execute(['--file' => 'foo']));
     }
 }

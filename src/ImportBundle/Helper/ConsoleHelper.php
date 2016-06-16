@@ -59,6 +59,7 @@ class ConsoleHelper
 
     /**
      * Just prints everything
+     * @codeCoverageIgnore
      */
     public function printInfo()
     {

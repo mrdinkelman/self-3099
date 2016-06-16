@@ -77,7 +77,8 @@ class ProductData
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
+     * @codeCoverageIgnore
      */
     public function getId()
     {
@@ -138,6 +139,7 @@ class ProductData
      * @param string $productCode
      *
      * @return ProductData
+     * @codeCoverageIgnore
      */
     public function setProductCode($productCode)
     {
@@ -149,7 +151,8 @@ class ProductData
     /**
      * Get productCode
      *
-     * @return string 
+     * @return string
+     * @codeCoverageIgnore
      */
     public function getProductCode()
     {
@@ -162,6 +165,7 @@ class ProductData
      * @param \DateTime $added
      *
      * @return ProductData
+     * @codeCoverageIgnore
      */
     public function setAdded($added)
     {
@@ -173,7 +177,7 @@ class ProductData
     /**
      * Get added
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getAdded()
     {
@@ -186,6 +190,7 @@ class ProductData
      * @param \DateTime $discontinued
      *
      * @return ProductData
+     * @codeCoverageIgnore
      */
     public function setDiscontinued($discontinued)
     {
@@ -197,7 +202,8 @@ class ProductData
     /**
      * Get discontinued
      *
-     * @return \DateTime 
+     * @return \DateTime
+     * @codeCoverageIgnore
      */
     public function getDiscontinued()
     {
@@ -210,6 +216,7 @@ class ProductData
      * @param \DateTime $timestamp
      *
      * @return ProductData
+     * @codeCoverageIgnore
      */
     public function setTimestamp($timestamp)
     {
@@ -221,7 +228,8 @@ class ProductData
     /**
      * Get timestamp
      *
-     * @return \DateTime 
+     * @return \DateTime
+     * @codeCoverageIgnore
      */
     public function getTimestamp()
     {
@@ -234,6 +242,7 @@ class ProductData
      * @param integer $stock
      *
      * @return ProductData
+     * @codeCoverageIgnore
      */
     public function setStock($stock)
     {
@@ -245,7 +254,8 @@ class ProductData
     /**
      * Get stock
      *
-     * @return integer 
+     * @return integer
+     * @codeCoverageIgnore
      */
     public function getStock()
     {
@@ -258,6 +268,7 @@ class ProductData
      * @param string $costInGBP
      *
      * @return ProductData
+     * @codeCoverageIgnore
      */
     public function setCostInGBP($costInGBP)
     {
@@ -269,7 +280,8 @@ class ProductData
     /**
      * Get costInGBP
      *
-     * @return string 
+     * @return string
+     * @codeCoverageIgnore
      */
     public function getCostInGBP()
     {

@@ -54,3 +54,4 @@ interface IImport
      */
     public function getDestinationEntity();
 }
+
