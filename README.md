@@ -19,6 +19,13 @@ This test solution use Symfony 2.8, PHP 5.6+ and command line for calling and de
 
 ### Usage
 
+Before start, init database. Creating script located at https://github.com/mrdinkelman/self-3099/blob/master/vagrant/task/make_database.sql
+
+Run Doctrine migration up
+```sh
+$ php app/console doctrine:migrations:execute 20160527165503 --up
+```
+
 In console, in project folder: 
 
 ```sh
