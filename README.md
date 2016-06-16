@@ -19,7 +19,8 @@ This test solution use Symfony 2.8, PHP 5.6+ and command line for calling and de
 
 ### Usage
 
-Before start, init database. Creating script located at https://github.com/mrdinkelman/self-3099/blob/master/vagrant/task/make_database.sql
+Before start, get all needed files with 'composer update' and don't forget to init database. 
+Creating script located at https://github.com/mrdinkelman/self-3099/blob/master/vagrant/task/make_database.sql
 
 Run Doctrine migration up
 ```sh
