@@ -62,3 +62,7 @@ Input test CSV located <https://github.com/mrdinkelman/self-3099/blob/master/vag
 * covered only files in ImportBundle
 
 ### Have a nice day ;)
+
+and, sure small notes:
+* vargrant installation and starting blank project with db, php version and etc - not implemented yet :(, main problem is tuning phpbrew. It can be possible with https://www.chef.io/ by additional request
+* project growind and studing can be checked in history for 'develop' branch.
