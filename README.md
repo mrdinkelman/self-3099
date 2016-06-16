@@ -10,4 +10,4 @@ Details and general info available at [project github]: <https://github.com/ddeb
 
 This test solution use Symfony 2.8, PHP 5.6+ and command line for calling and delivering import results.
 
-![alt tag](https://drive.google.com/open?id=0B8NUnoo8tmdReDRVZW8ydEdzVDA)
+![alt tag](blob:https://drive.google.com/4ba0932f-b095-485a-8583-854c08eeda1d)
