@@ -46,6 +46,7 @@ Input test CSV located <https://github.com/mrdinkelman/self-3099/blob/master/vag
 * Potential encoding problem solved with external lib - ***neitanod/forceutf8*** https://github.com/neitanod/forceutf8
 * Price & Stock rules can be easy tuned up in ProductData helper. Also, all names, fields and rules located here.
 * Migrations script can be found in app/DoctrineMigrations (default Symfony creationg path). For money column I choose DECIMAL data-type
+* Discontinues items control - in values converters, idea if we have something in this field in source - return Datetime.
 
 
 ### Small tweaks and improvements, from /src/ImportBundle
