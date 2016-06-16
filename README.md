@@ -49,7 +49,7 @@ Input test CSV located <https://github.com/mrdinkelman/self-3099/blob/master/vag
 
 
 ### Small tweaks and improvements, from /src/ImportBundle
-* /Helper/ConsoleHelper with SymfonyStyle - easy organizing pretty output (colors, notes, titles and etc.)
+* /Helper/ConsoleHelper with SymfonyStyle - easy organizing pretty output (colors, notes, titles and etc.) for results messages
 * /Helper/DateTime extending default DateTime for adding __toString() method. It's needed because if you want add ConsoleWriter to process and then run it with DateTime values you will get Exception, that import lib can not implement string representaion of DateTime. Sure, we can use value converters, but I think that's more easy to use with DateTime values
 * /Helper/IImport interface will help you with organizing your import rules
 * /Filters - standard filter component from import lib don't provide reject reasons, I think, sometimes reject reasons may be useful for user. Extend your own filer from BaseFilter and then you can get reject reason. 
