@@ -9,3 +9,5 @@ In this task used basical functionality of 'data-import' but with some improveme
 Details and general info available at [project github]: <https://github.com/ddeboer/data-import>
 
 This test solution use Symfony 2.8, PHP 5.6+ and command line for calling and delivering import results.
+
+![alt tag](https://drive.google.com/open?id=0B8NUnoo8tmdReDRVZW8ydEdzVDA)
