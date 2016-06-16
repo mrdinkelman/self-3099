@@ -31,4 +31,4 @@ $ php app/console import:products -t
 ```
 
 More options (changing file) available with --help command.
-Input test CSV located [here]<https://github.com/mrdinkelman/self-3099/blob/master/vagrant/task/stock.csv>
+Input test CSV located [here]:<https://github.com/mrdinkelman/self-3099/blob/master/vagrant/task/stock.csv>
