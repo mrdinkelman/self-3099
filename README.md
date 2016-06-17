@@ -57,7 +57,7 @@ Input test CSV located <https://github.com/mrdinkelman/self-3099/blob/master/vag
 * /Filters - standard filter component from import lib doesn't provide reject reasons. I think, sometimes reject reasons may be helpful for user. Extend your own filer from BaseFilter and then you can get reject reason.
 * Added ability to add FilterExceptions, this is not simple "false" - may be useful for handling critical errors like 'unsupported data-type'
 * Like default folders in lib, just put you /Writer, /ItemConverts and /ValueConverter in same folders.
-* [update] ArrayWriter in test mode replaced by NUllWriter
+* [update] ArrayWriter in test mode replaced by NullWriter
 * Result and Workflow parent classes was extended, it's needed for adding reject reasons processing
 
 ### Tests
