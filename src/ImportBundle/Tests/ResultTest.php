@@ -2,7 +2,7 @@
 
 namespace ImportBundle;
 
-use ImportBundle\Exception\RuntimeException;
+use ImportBundle\Exception\RuntimeImportException;
 use ImportBundle\Helper\DateTime;
 
 class ResultTest extends \PHPUnit_Framework_TestCase
@@ -19,7 +19,7 @@ class ResultTest extends \PHPUnit_Framework_TestCase
             new DateTime(),
             new DateTime(),
             10,
-            [ new RuntimeException()],
+            [ new RuntimeImportException()],
             [ 1 => 'bar']
         );
     }

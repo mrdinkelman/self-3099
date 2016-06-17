@@ -28,10 +28,6 @@ class DiscontinuedConverter implements ValueConverterInterface
      */
     public function convert($input)
     {
-        if (empty($input)) {
-            return null;
-        }
-
-        return new DateTime();
+        return empty($input) ? null : new DateTime();
     }
 }

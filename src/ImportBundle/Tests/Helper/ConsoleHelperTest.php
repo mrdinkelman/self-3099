@@ -8,7 +8,7 @@
 
 namespace ImportBundle\Tests;
 
-use ImportBundle\Exception\RuntimeException;
+use ImportBundle\Exception\RuntimeImportException;
 use ImportBundle\Helper\ConsoleHelper;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Application;
@@ -30,7 +30,7 @@ class ConsoleHelperTest extends KernelTestCase
     {
         $command = new SimpleCommand('foo');
         $commandTest = new CommandTester($command);
-        $commandTest->execute(array());
+        $commandTest->execute([]);
 
         $this->blankObject = new ConsoleHelper(
             new SymfonyStyle($commandTest->getInput(), $commandTest->getOutput()),
@@ -39,7 +39,7 @@ class ConsoleHelperTest extends KernelTestCase
             []
         );
 
-        $exception = new RuntimeException('exception');
+        $exception = new RuntimeImportException('exception');
 
         $this->filledObject = new ConsoleHelper(
             new SymfonyStyle($commandTest->getInput(), $commandTest->getOutput()),

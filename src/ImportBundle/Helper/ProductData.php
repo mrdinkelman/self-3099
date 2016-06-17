@@ -44,12 +44,12 @@ class ProductData implements IImport
     public function getMapping()
     {
         return [
-            'Product Code' => 'productCode',
-            'Product Name' => 'productName',
-            'Product Description' => 'productDesc',
-            'Stock' => 'stock',
-            'Cost in GBP' => 'costInGBP',
-            'Discontinued' => 'discontinued'
+            "Product Code" => "productCode",
+            "Product Name" => "productName",
+            "Product Description" => "productDesc",
+            "Stock" => "stock",
+            "Cost in GBP" => "costInGBP",
+            "Discontinued" => "discontinued"
         ];
     }
 
@@ -74,7 +74,7 @@ class ProductData implements IImport
     public function getFilters()
     {
         return [
-            new CostAndStockFilter('Cost in GBP', 'Stock')
+            new CostAndStockFilter("Cost in GBP", "Stock", 5, 1000, 10)
         ];
     }
 }

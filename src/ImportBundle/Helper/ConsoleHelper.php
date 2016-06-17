@@ -25,19 +25,19 @@ class ConsoleHelper
      * Errors during import
      * @var array
      */
-    protected $errors = array();
+    protected $errors = [];
 
     /**
      * Rows, not accepted by filters during import
      * @var array
      */
-    protected $filtered = array();
+    protected $filtered = [];
 
     /**
      * Exceptions in import process
      * @var array
      */
-    protected $exceptions = array();
+    protected $exceptions = [];
 
     /**
      * ConsoleHelper constructor.
@@ -47,8 +47,8 @@ class ConsoleHelper
      * @param array $filtered
      * @param array $exceptions
      */
-    public function __construct(SymfonyStyle $io, array $errors = array(),
-        array $filtered = array(), array $exceptions = array()
+    public function __construct(SymfonyStyle $io, array $errors = [],
+        array $filtered = [], array $exceptions = []
     ) {
         $this->io = $io;
 

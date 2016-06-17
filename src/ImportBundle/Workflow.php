@@ -22,7 +22,7 @@ class Workflow extends \Ddeboer\DataImport\Workflow
      * Collection of filtered rows
      * @var array
      */
-    protected $filtered = array();
+    protected $filtered = [];
 
     /**
      * Filter item
@@ -36,7 +36,7 @@ class Workflow extends \Ddeboer\DataImport\Workflow
         // SplPriorityQueue must be cloned because it is a stack and thus drops
         // elements each time it is iterated over.
         foreach (clone $filters as $filter) {
-            if (false == $filter->filter($item)) {
+            if (false === $filter->filter($item)) {
                 // set reject reason possible only with BaseFilter
                 // instances. Standard filters not support this feature
                 if ($filter instanceof BaseFilter) {
@@ -48,6 +48,7 @@ class Workflow extends \Ddeboer\DataImport\Workflow
                 // another filer from the box. We don't know about reason
                 // whey value was not pass filter validation
                 $this->filtered[$this->reader->key()] = self::MESS_UNKNOWN_REASON;
+
                 return false;
             }
         }
@@ -86,7 +87,7 @@ class Workflow extends \Ddeboer\DataImport\Workflow
      */
     public function clearWriters()
     {
-        $this->writers = array();
+        $this->writers = [];
 
         return $this;
     }

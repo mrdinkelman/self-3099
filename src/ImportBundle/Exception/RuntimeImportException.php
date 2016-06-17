@@ -12,9 +12,9 @@ use Ddeboer\DataImport\Exception\ExceptionInterface;
  *
  * @package ImportBundle\Exception
  */
-// @@codeCoverageIgnoreStart
-class RuntimeException extends \RuntimeException implements ExceptionInterface
+// @codeCoverageIgnoreStart
+class RuntimeImportException extends \RuntimeException implements ExceptionInterface
 {
 
 }
-// @@codeCoverageIgnoreEnd
+// @codeCoverageIgnoreEnd

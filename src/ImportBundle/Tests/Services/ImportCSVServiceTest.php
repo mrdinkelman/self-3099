@@ -2,7 +2,7 @@
 namespace Services;
 
 use Doctrine\ORM\EntityManager;
-use ImportBundle\Exception\RuntimeException;
+use ImportBundle\Exception\RuntimeImportException;
 use ImportBundle\Services\ImportCSVService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -34,7 +34,7 @@ class ImportCSVServiceTest extends KernelTestCase
             $tester = clone $this->tester;
 
             $tester->setInputFile(new \SplFileObject(__FILE__));
-        } catch (RuntimeException $ex) {
+        } catch (RuntimeImportException $ex) {
             $this->assertStringStartsWith("Unable to add or read file", $ex->getMessage());
         }
     }
@@ -45,7 +45,7 @@ class ImportCSVServiceTest extends KernelTestCase
             $tester = clone $this->tester;
 
             $tester->execute();
-        } catch (RuntimeException $ex) {
+        } catch (RuntimeImportException $ex) {
             $this->assertStringStartsWith("Wrong call. Please set-up input file and helper first.", $ex->getMessage());
         }
     }

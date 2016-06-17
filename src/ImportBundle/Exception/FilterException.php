@@ -13,9 +13,9 @@ use Ddeboer\DataImport\Exception\ReaderException;
  *
  * @package ImportBundle\Exception
  */
-// @@codeCoverageIgnoreStart
+// @codeCoverageIgnoreStart
 class FilterException extends ReaderException implements ExceptionInterface
 {
 
 }
-// @@codeCoverageIgnoreEnd
+// @codeCoverageIgnoreEnd

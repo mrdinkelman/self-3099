@@ -18,7 +18,7 @@ class Result extends \Ddeboer\DataImport\Result
      *
      * @var array
      */
-    protected $filtered = array();
+    protected $filtered = [];
 
     /**
      * Result constructor.

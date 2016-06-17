@@ -25,7 +25,7 @@ class Version20160527165503 extends AbstractMigration
     public function preUp(Schema $schema)
     {
         // platform checking
-        if ($this->connection->getDatabasePlatform()->getName() != 'mysql') {
+        if ($this->connection->getDatabasePlatform()->getName() != "mysql") {
             $this->abortIf(true, "Migration [UP] can be executed safely on 'mysql'");
         }
     }
@@ -55,7 +55,7 @@ class Version20160527165503 extends AbstractMigration
     public function preDown(Schema $schema)
     {
         // platform checking
-        if ($this->connection->getDatabasePlatform()->getName() != 'mysql') {
+        if ($this->connection->getDatabasePlatform()->getName() != "mysql") {
             $this->abortIf(true, "Migration [DOWN] can be executed safely on 'mysql'");
         }
     }

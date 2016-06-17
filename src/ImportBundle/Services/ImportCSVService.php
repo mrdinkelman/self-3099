@@ -10,10 +10,11 @@ use Ddeboer\DataImport\Reader\ReaderInterface;
 use Ddeboer\DataImport\Writer\ArrayWriter;
 use Ddeboer\DataImport\Writer\DoctrineWriter;
 use Doctrine\ORM\EntityManager;
-use ImportBundle\Exception\RuntimeException;
+use ImportBundle\Exception\RuntimeImportException;
 use ImportBundle\Helper\IImport;
 use ImportBundle\Result;
 use ImportBundle\Workflow;
+use ImportBundle\Writer\NullWriter;
 use Symfony\Component\HttpKernel\Log\LoggerInterface;
 
 /**
@@ -105,7 +106,9 @@ class ImportCSVService
     {
         // verification
         if (!$inputFile->isFile() || strtolower($inputFile->getExtension() != 'csv')) {
-            throw new RuntimeException("Unable to add or read file $inputFile");
+            throw new RuntimeImportException(
+                sprintf("Unable to add or read file %s", $inputFile)
+            );
         }
 
         $this->inputFile = $inputFile;
@@ -206,14 +209,16 @@ class ImportCSVService
      *
      * @return $this
      *
-     * @throws RuntimeException
+     * @throws RuntimeImportException
      */
     public function execute()
     {
         // validate normal workflow, don't allow call execute
         // without setting file or helper
         if (!$this->inputFile || !$this->helper) {
-            throw new RuntimeException("Wrong call. Please set-up input file and helper first.");
+            throw new RuntimeImportException(
+                "Wrong call. Please set-up input file and helper first."
+            );
         }
 
         // set reader and init them
@@ -233,11 +238,7 @@ class ImportCSVService
         // emulate writing in debug mode
         if ($this->debug) {
             $workflow->clearWriters();
-            $testData = [];
-
-            $workflow->addWriter(
-                new ArrayWriter($testData)
-            );
+            $workflow->addWriter(new NullWriter());
         }
 
         // filter values

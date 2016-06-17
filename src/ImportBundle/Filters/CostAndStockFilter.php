@@ -56,7 +56,7 @@ class CostAndStockFilter extends BaseFilter implements FilterInterface
      * @param int    $maxCost
      * @param int    $minStock
      */
-    public function __construct($costField, $stockField, $minCost = 5, $maxCost = 1000, $minStock = 10)
+    public function __construct($costField, $stockField, $minCost, $maxCost, $minStock)
     {
         // column names
         $this->costField = $costField;

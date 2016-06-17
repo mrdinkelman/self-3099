@@ -11,7 +11,7 @@ class CostAndStockFilterTest extends \PHPUnit_Framework_TestCase
     {
         // unable to detect input keys in item
         try {
-            $tester = new CostAndStockFilter('cost', 'stock');
+            $tester = new CostAndStockFilter('cost', 'stock', 1, 2, 3);
             $tester->filter(['foo' => 'bar']);
         } catch (FilterException $ex) {
             $this->assertStringStartsWith('cost or stock fields', $ex->getMessage());
@@ -19,7 +19,7 @@ class CostAndStockFilterTest extends \PHPUnit_Framework_TestCase
 
         // values should be numeric
         try {
-            $tester = new CostAndStockFilter('cost', 'stock');
+            $tester = new CostAndStockFilter('cost', 'stock', 1, 2, 3);
             $tester->filter(['cost' => 'bar', 'stock' => '']);
         } catch (FilterException $ex) {
             $this->assertStringStartsWith('cost or stock values should be numeric', $ex->getMessage());
@@ -37,7 +37,7 @@ class CostAndStockFilterTest extends \PHPUnit_Framework_TestCase
 
     public function testGetPriority()
     {
-        $tester = new CostAndStockFilter('cost', 'stock');
+        $tester = new CostAndStockFilter('cost', 'stock', 1, 2, 3);
         $this->assertEquals(0, $tester->getPriority());
     }
 

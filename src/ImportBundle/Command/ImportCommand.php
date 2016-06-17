@@ -4,7 +4,7 @@
  */
 namespace ImportBundle\Command;
 
-use ImportBundle\Exception\RuntimeException;
+use ImportBundle\Exception\RuntimeImportException;
 use ImportBundle\Helper\ConsoleHelper;
 use ImportBundle\Helper\ProductData;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -33,11 +33,11 @@ class ImportCommand extends ContainerAwareCommand
             ->setName("import:products") // can be cached
             ->setDescription("SELF-3099 simple console application")
             ->addOption(
-                'file', 'f', InputOption::VALUE_OPTIONAL,
-                "Path to import file", dirname(__FILE__)."/../../../vagrant/task/stock.csv"
-            ) // default file from package
+                "file", "f", InputOption::VALUE_OPTIONAL,
+                "Path to import file", dirname(__FILE__)."/../Tests/stock.csv"
+            ) // default file for testing
             ->addOption(
-                'test-mode', 't', InputOption::VALUE_NONE,
+                "test-mode", "t", InputOption::VALUE_NONE,
                 "If set, application will not make changes in db"
             ) // deactivated by default
         ;
@@ -57,25 +57,29 @@ class ImportCommand extends ContainerAwareCommand
         $io = new SymfonyStyle($input, $output);
 
         // set general messages
-        $io->title('Hello, I am Symfony SELF-3099 test task and now I will try to run :)');
+        $io->title("Hello, I am Symfony SELF-3099 test task and now I will try to run :)");
+
         $io->section(sprintf("Starting..."));
-        $io->text(sprintf("Importing file... %s",  $input->getOption('file')));
+        $io->text(sprintf(
+            "Importing file... %s",
+            realpath($input->getOption('file')))
+        );
 
         // test mode activated, tell user about it
-        if ($input->getOption('test-mode')) {
+        if ($input->getOption("test-mode")) {
             $io->note("Test mode activated. No real changed in db");
         }
 
         // get service and try to run import process
-        $service = $this->getContainer()->get('service.import_csv_service');
+        $service = $this->getContainer()->get("service.import_csv_service");
 
         try {
             $service
-                ->setInputFile(new \SplFileObject($input->getOption('file')))
-                ->setDebug($input->getOption('test-mode', false))
+                ->setInputFile(new \SplFileObject($input->getOption("file")))
+                ->setDebug($input->getOption("test-mode", false))
                 ->setHelper(new ProductData())
                 ->execute();
-        } catch (RuntimeException $ex) {
+        } catch (RuntimeImportException $ex) {
             // @codeCoverageIgnoreStart
             // exceptions from service already covered in service test
             $io->error(
@@ -109,21 +113,21 @@ class ImportCommand extends ContainerAwareCommand
 
 
         // summary info, can be moved to helper if needed in future
-        $totalRows = $service->getReader()->count();
-        $readerErrors = count($service->getReader()->getErrors());
-        $success = $service->getWorkflowResult()->getSuccessCount();
-        $exceptions = count($service->getWorkflowResult()->getExceptions());
-        $filtered = count($service->getWorkflowResult()->getFiltered());
+        $totalRowsCount = $service->getReader()->count();
+        $readerErrorsCount = count($service->getReader()->getErrors());
+        $successCount = $service->getWorkflowResult()->getSuccessCount();
+        $exceptionsCount = count($service->getWorkflowResult()->getExceptions());
+        $filteredCount = count($service->getWorkflowResult()->getFiltered());
 
         $io->success(
             sprintf(
                 "Summary -> Rows: total - %s, with errors - %s. " .
                 "Filtered: by rules - %s, by exceptions - %s. Inserted - %s",
-                $totalRows,
-                $readerErrors,
-                $filtered,
-                $exceptions,
-                $success
+                $totalRowsCount,
+                $readerErrorsCount,
+                $filteredCount,
+                $exceptionsCount,
+                $successCount
             )
         );
 
