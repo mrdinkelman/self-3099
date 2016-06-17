@@ -1,6 +1,6 @@
 # SELF-3099 Import CSV test task
 ![alt tag](https://img.shields.io/badge/build-passing-green.svg) 
-![alt tag](https://img.shields.io/badge/version-1.0.0--alpha-orange.svg)
+![alt tag](https://img.shields.io/badge/version-1.0.1--alpha-orange.svg)
 ![alt tag](https://img.shields.io/badge/coverage-100-green.svg)
 
 
